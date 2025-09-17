@@ -1,16 +1,8 @@
-import express from "express";
-import User from "../models/userSchema.js";
+import { Router } from "express";
+import { users } from "../controllers/user.controller.js";
 
-const app = express();
+const router = Router();
 
-app.get('/users', async (req, res) => {
-    try {
-        const users = await User.find();
-        res.status(200).json(users);
-    } catch (error) {
-        console.error(error);
-        res.status(404).json({ message: "Error, cannot find users" });
-    }
-})
+router.get("/users", users);
 
-export default app;
+export default router;
