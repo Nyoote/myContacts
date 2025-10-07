@@ -4,15 +4,21 @@ import {
     TableBody, Paper, IconButton, Alert, Stack, Tooltip
 } from "@mui/material";
 import {Edit, Delete, Add} from "@mui/icons-material";
-import {fetchContacts} from "../Api/contacts";
+import {deleteContact, fetchContacts} from "../Api/contacts";
 import SnackbarAlert from "../Components/SnackbarAlert.jsx";
 import AddContactDialog from "../Components/AddContactDialog.jsx";
+import ConfirmDeleteDialog from "../Components/ConfirmDeleteDialog.jsx";
+import EditContactDialog from "../Components/EditContactDialog.jsx";
 
 export default function Contacts() {
     const [contacts, setContacts] = useState([]);
     const [error, setError] = useState("");
     const [openAdd, setOpenAdd] = useState(false);
     const [snack, setSnack] = useState(null);
+    const [openEdit, setOpenEdit] = useState(false);
+    const [editContact, setEditContact] = useState(null);
+    const [openDelete, setOpenDelete] = useState(false);
+    const [selectedContact, setSelectedContact] = useState(null);
 
     const loadContacts = async () => {
         setError("");
@@ -31,6 +37,38 @@ export default function Contacts() {
     const handleAdded = async () => {
         await loadContacts();
         setSnack({message: "Contact added successfully", severity: "success"});
+    };
+
+    const openEditDialog = (contact) => {
+        setEditContact(contact);
+        setOpenEdit(true);
+    };
+    const handleEdited = async () => {
+        await loadContacts();
+        setSnack({message: "Contact updated successfully", severity: "success"});
+    };
+
+    const askDelete = (contact) => {
+        setSelectedContact(contact);
+        setOpenDelete(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!selectedContact) return;
+        try {
+            await deleteContact(selectedContact._id);
+            setOpenDelete(false);
+            setSelectedContact(null);
+            await loadContacts();
+            setSnack({message: "Contact deleted successfully", severity: "success"});
+        } catch (e) {
+            setOpenDelete(false);
+            setSelectedContact(null);
+            setSnack({
+                message: e?.response?.data?.message || "Error while deleting contact",
+                severity: "error",
+            });
+        }
     };
 
     return (
@@ -58,7 +96,7 @@ export default function Contacts() {
                         {contacts.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={4}>
-                                    <Alert severity="info">No contacts yet.</Alert>
+                                    <Alert severity="info">No contacts yet</Alert>
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -70,14 +108,14 @@ export default function Contacts() {
                                     <TableCell align="right">
                                         <Tooltip title="Edit">
                                             <span>
-                                                <IconButton size="small" disabled>
+                                                <IconButton size="small" onClick={() => openEditDialog(c)}>
                                                     <Edit fontSize="small"/>
                                                 </IconButton>
                                             </span>
                                         </Tooltip>
                                         <Tooltip title="Delete">
                                             <span>
-                                            <IconButton size="small" color="error" disabled>
+                                            <IconButton size="small" color="error" onClick={() => askDelete(c)}>
                                               <Delete fontSize="small"/>
                                             </IconButton>
                                           </span>
@@ -94,6 +132,26 @@ export default function Contacts() {
                 open={openAdd}
                 onClose={() => setOpenAdd(false)}
                 onSuccess={handleAdded}
+            />
+
+            <EditContactDialog
+                open={openEdit}
+                onClose={() => {
+                    setOpenEdit(false);
+                    setEditContact(null);
+                }}
+                onSuccess={handleEdited}
+                contact={editContact}
+            />
+
+            <ConfirmDeleteDialog
+                open={openDelete}
+                onClose={() => {
+                    setOpenDelete(false);
+                    setSelectedContact(null);
+                }}
+                onConfirm={confirmDelete}
+                contact={selectedContact}
             />
 
             <SnackbarAlert

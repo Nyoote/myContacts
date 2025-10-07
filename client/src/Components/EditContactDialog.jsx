@@ -1,16 +1,27 @@
-import {useState} from "react";
+import { useEffect, useState } from "react";
 import {
     Dialog, DialogTitle, DialogContent, Stack,
     TextField, Button, Alert
 } from "@mui/material";
-import {createContact} from "../Api/contacts";
+import { updateContact } from "../Api/contacts";
 
-export default function AddContactDialog({open, onClose, onSuccess}) {
-    const [formData, setFormData] = useState({firstName: "", lastName: "", phone: ""});
+export default function EditContactDialog({ open, onClose, onSuccess, contact }) {
+    const [formData, setFormData] = useState({ firstName: "", lastName: "", phone: "" });
     const [errors, setErrors] = useState({});
     const [serverError, setServerError] = useState("");
     const [submitting, setSubmitting] = useState(false);
-    const phoneRegex = /^[0-9]+$/;
+
+    useEffect(() => {
+        if (open && contact) {
+            setFormData({
+                firstName: contact.firstName || "",
+                lastName:  contact.lastName  || "",
+                phone:     contact.phone     || "",
+            });
+            setErrors({});
+            setServerError("");
+        }
+    }, [open, contact]);
 
     const handleChange = (e) => {
         setFormData((p) => ({...p, [e.target.name]: e.target.value}));
@@ -19,41 +30,30 @@ export default function AddContactDialog({open, onClose, onSuccess}) {
     };
 
     const validate = () => {
+        const phoneRegex = /^[0-9]+$/;
         const newErrors = {};
         if (!formData.firstName.trim()) newErrors.firstName = "First name required";
-        if (!formData.lastName.trim()) newErrors.lastName = "Last name required";
-        if (!formData.phone.trim()) newErrors.phone = "Phone required";
+        if (!formData.lastName.trim())  newErrors.lastName  = "Last name required";
+        if (!formData.phone.trim())     newErrors.phone     = "Phone required";
+        else if (!phoneRegex.test(formData.phone)) newErrors.phone = "Phone must contain only digits";
         else if (formData.phone.length < 10 || formData.phone.length > 20)
-            newErrors.phone = "Phone must be 10–20 characters";
-        else if (!phoneRegex.test(formData.phone))
-            newErrors.phone = "Phone must be numbers only";
+            newErrors.phone = "Phone must be 10–20 digits";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    const reset = () => {
-        setFormData({firstName: "", lastName: "", phone: ""});
-        setErrors({});
-        setServerError("");
-    };
-
     const handleClose = () => {
-        if (!submitting) {
-            reset();
-            onClose?.();
-        }
+        if (!submitting) onClose?.();
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setServerError("");
-
         if (!validate()) return;
 
         setSubmitting(true);
         try {
-            await createContact(formData);
-            reset();
+            await updateContact(contact._id, formData);
             onSuccess?.();
             onClose?.();
         } catch (err) {
@@ -61,9 +61,11 @@ export default function AddContactDialog({open, onClose, onSuccess}) {
             if (!data) {
                 setServerError("Network error, cannot connect to the server");
             } else if (data.field && data.error) {
-                setErrors((p) => ({...p, [data.field]: data.error}));
+                setErrors((p) => ({ ...p, [data.field]: data.error }));
+            } else if (data.errors && typeof data.errors === "object") {
+                setErrors((p) => ({ ...p, ...data.errors }));
             } else {
-                const msg = data.error || data.message || "Error, cannot add contact";
+                const msg = data.error || data.message || "Error, cannot update contact";
                 setServerError(msg);
             }
         } finally {
@@ -73,9 +75,9 @@ export default function AddContactDialog({open, onClose, onSuccess}) {
 
     return (
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-            <DialogTitle>Add a contact</DialogTitle>
+            <DialogTitle>Edit contact</DialogTitle>
             <DialogContent>
-                <Stack component="form" autoComplete="off" noValidate onSubmit={handleSubmit} sx={{mt: 1, gap: 2}}>
+                <Stack component="form" autoComplete="off" noValidate onSubmit={handleSubmit} sx={{ mt: 1, gap: 2 }}>
                     {serverError && <Alert severity="error" aria-live="polite">{serverError}</Alert>}
 
                     <TextField
@@ -106,13 +108,13 @@ export default function AddContactDialog({open, onClose, onSuccess}) {
                         error={!!errors.phone}
                         helperText={errors.phone}
                         required
-                        inputProps={{minLength: 10, maxLength: 20, pattern: phoneRegex}}
+                        inputProps={{ minLength: 10, maxLength: 20 }}
                     />
 
-                    <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{mt: 1, mb: 1}}>
+                    <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ mt: 1, mb: 1 }}>
                         <Button onClick={handleClose}>Cancel</Button>
-                        <Button type="submit" variant="contained">
-                            Add
+                        <Button type="submit" variant="contained" >
+                            Save
                         </Button>
                     </Stack>
                 </Stack>

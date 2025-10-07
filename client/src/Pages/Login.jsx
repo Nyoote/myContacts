@@ -95,7 +95,6 @@ export default function Login() {
                     error={!!errors.password}
                     helperText={errors.password}
                     required
-                    fullWidth
                     InputProps={{
                         endAdornment: (
                             <InputAdornment position="end">
