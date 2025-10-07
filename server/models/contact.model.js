@@ -21,6 +21,7 @@ const contactModel = new mongoose.Schema(
             required: true,
             minlength: [10, "Phone number must be at least 10 characters"],
             maxlength: [20, "Phone number cannot exceed 20 characters"],
+            match: [/^[0-9]+$/, "Phone number must contain only digits"],
         },
     },
     {timestamps: true}
