@@ -2,6 +2,12 @@ import mongoose from "mongoose";
 
 const contactModel = new mongoose.Schema(
     {
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+            index: true,
+        },
         firstName: {
             type: String,
             required: true,
@@ -12,7 +18,6 @@ const contactModel = new mongoose.Schema(
         },
         phone: {
             type: String,
-            unique: true,
             required: true,
             minlength: [10, "Phone number must be at least 10 characters"],
             maxlength: [20, "Phone number cannot exceed 20 characters"],
@@ -20,5 +25,7 @@ const contactModel = new mongoose.Schema(
     },
     {timestamps: true}
 );
+
+contactModel.index({ user: 1, phone: 1 }, { unique: true });
 
 export default mongoose.model("Contact", contactModel);

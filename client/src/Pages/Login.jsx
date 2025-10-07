@@ -48,7 +48,7 @@ export default function Login() {
             const res = await loginUser(formData);
             localStorage.setItem("token", res.token);
             setSnackbarAlertOpen(true);
-            setTimeout(() => navigate("/home"), 1000);
+            setTimeout(() => navigate("/contacts"), 1000);
         } catch (err) {
             const data = err?.response?.data;
             if (!data) {
