@@ -6,9 +6,12 @@ export const register = async (req, res) => {
     const { username, email, password } = req.body;
 
     try {
-        const existingUser = await User.findOne({ email });
-        if (existingUser)
-            return res.status(400).json({ error: "User already exists" });
+        const existingUsername = await User.findOne({username});
+        if (existingUsername)
+            return res.status(409).json({ field: "username",error: "Username is already taken" });
+        const existingEmail = await User.findOne({email});
+        if (existingEmail)
+            return res.status(409).json({ field: "email",error: "Email already exists" });
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -25,13 +28,15 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const user = await User.findOne({ email });
-        if (!user)
-            return res.status(400).json({ error: "Invalid email" });
+        const INVALID = "Invalid email or password";
+        const user = await User.findOne({email});
 
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
-        if (!isPasswordMatch)
-            return res.status(400).json({ error: "Invalid password" });
+        const DUMMY_HASH = "$2b$10$VnH4lD8u4iQ0G1rQH2YfUuWm8.7p5p8mXlZc6gQ2bW1aKx7b3F6Si";
+        const hashToCompare = user?.password || DUMMY_HASH;
+        const isPasswordMatch = await bcrypt.compare(password, hashToCompare);
+
+        if (!user || !isPasswordMatch)
+            return res.status(401).json({ error: INVALID });
 
         const token = jwt.sign(
             { id: user._id, email: user.email },
