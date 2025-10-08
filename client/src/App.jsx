@@ -6,21 +6,23 @@ import Contacts from "./Pages/Contacts.jsx";
 import PublicRoute from "./Routes/PublicRoute.jsx";
 import PrivateRoute from "./Routes/PrivateRoute.jsx";
 import Header from "./Components/Header.jsx";
+import FallbackRedirect from "./Routes/FallbackRedirect.jsx";
 
 const App = () => {
     return (
         <>
             <Header/>
             <Routes>
-                <Route element={<PublicRoute />}>
-                    <Route path="/register" element={<Register />}/>
-                    <Route path="/login" element={<Login />}/>
+                <Route element={<PublicRoute/>}>
+                    <Route path="/register" element={<Register/>}/>
+                    <Route path="/login" element={<Login/>}/>
                     <Route path="/" element={<Navigate to="/register" replace/>}/>
                 </Route>
 
-                <Route element={<PrivateRoute />}>
-                    <Route path="/contacts" element={<Contacts />}/>
+                <Route element={<PrivateRoute/>}>
+                    <Route path="/contacts" element={<Contacts/>}/>
                 </Route>
+                <Route path="*" element={<FallbackRedirect />}/>
             </Routes>
         </>
     )
