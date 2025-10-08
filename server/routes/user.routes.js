@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { users } from "../controllers/user.controller.js";
+import {getCurrentUser, users} from "../controllers/user.controller.js";
+import {requireAuth} from "../middleware/requireAuth.middleware.js";
 
 const router = Router();
 
@@ -70,7 +71,27 @@ const router = Router();
  *         description: Error, cannot find users
  */
 
+/**
+ * @swagger
+ * /api/me:
+ *   get:
+ *     summary: Get current authenticated user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current user information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Unauthorized or invalid token
+ */
+
 
 router.get("/getUsers", users);
+router.get("/me", requireAuth, getCurrentUser);
 
 export default router;

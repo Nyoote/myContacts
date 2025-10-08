@@ -8,3 +8,15 @@ export const users = async (req, res) => {
         res.status(404).json({ message: "Error, cannot find users" });
     }
 };
+
+export const getCurrentUser = async (req, res) => {
+    try {
+        res.status(200).json({
+            id: req.user._id,
+            username: req.user.username,
+            email: req.user.email,
+        });
+    } catch (err) {
+        res.status(500).json({ message: "Unable to fetch user info" });
+    }
+};

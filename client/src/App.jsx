@@ -5,10 +5,12 @@ import Login from "./Pages/Login.jsx";
 import Contacts from "./Pages/Contacts.jsx";
 import PublicRoute from "./Routes/PublicRoute.jsx";
 import PrivateRoute from "./Routes/PrivateRoute.jsx";
+import Header from "./Components/Header.jsx";
 
 const App = () => {
     return (
         <>
+            <Header/>
             <Routes>
                 <Route element={<PublicRoute />}>
                     <Route path="/register" element={<Register />}/>
