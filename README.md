@@ -221,12 +221,11 @@ Aucune base de données partagée ni compte par défaut n’est fourni.
     - Cela te permettra d’accéder aux routes protégées (`/api/*`).
 
 ---
- **Astuce :**  
- Tu peux facilement tester ces endpoints avec [Postman](https://www.postman.com/)
----
+
 ## 10. Liens
 
 * L'API sera disponible sur [http://localhost:3000](http://localhost:3000)
+*  Tu peux facilement tester les endpoints avec [Postman](https://www.postman.com/)
 * La doc Swagger sera disponible sur [http://localhost:3000/api-doc](http://localhost:3000/api-doc)
 * Back déployé [https://mycontacts-o1ko.onrender.com](https://mycontacts-o1ko.onrender.com)
 * Front déployé [https://mycontacts-frontend-ohmg.onrender.com](https://mycontacts-frontend-ohmg.onrender.com)
